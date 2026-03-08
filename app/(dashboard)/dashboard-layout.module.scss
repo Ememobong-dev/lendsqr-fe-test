@@ -1,0 +1,60 @@
+.layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #fbfbfb;
+}
+
+.topbarPane {
+  height: 80px;
+  min-height: 80px;
+  background: #ffffff;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.04);
+  z-index: 30;
+}
+
+.bodyPane {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+.sidebarPane {
+  width: 283px;
+  min-width: 283px;
+  height: 100%;
+  background: #ffffff;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.04);
+  z-index: 20;
+}
+
+.contentPane {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 60px 40px 40px;
+  background: #fbfbfb;
+}
+
+.contentPane::-webkit-scrollbar {
+  width: 8px;
+}
+
+.contentPane::-webkit-scrollbar-thumb {
+  background: rgba(33, 63, 125, 0.15);
+  border-radius: 999px;
+}
+
+@media (max-width: 1024px) {
+  .sidebarPane {
+    display: none;
+  }
+
+  .contentPane {
+    padding: 24px 16px 32px;
+  }
+}

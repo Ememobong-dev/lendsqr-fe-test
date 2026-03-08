@@ -1,0 +1,196 @@
+.wrapper {
+    position: relative;
+    width: 100%;
+  }
+  
+  .toolbar {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  
+  .searchInput {
+    width: 100%;
+    max-width: 320px;
+    height: 40px;
+    border: 1px solid rgba(33, 63, 125, 0.15);
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 0 14px;
+    font-size: 14px;
+    color: #545f7d;
+    outline: none;
+  
+    &::placeholder {
+      color: rgba(84, 95, 125, 0.7);
+    }
+  
+    &:focus {
+      border-color: #39cdcc;
+    }
+  }
+  
+  .filterToggle {
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    background: #39cdcc;
+    color: #ffffff;
+    padding: 0 18px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  .tableArea {
+    position: relative;
+  }
+  
+  .filterCard {
+    position: absolute;
+    top: 70px;
+    left: 14px;
+    z-index: 10;
+    width: 270px;
+    border: 1px solid rgba(84, 95, 125, 0.14);
+    border-radius: 4px;
+    background: #ffffff;
+    box-shadow: 3px 5px 20px rgba(0, 0, 0, 0.04);
+    padding: 24px 20px;
+  }
+  
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 20px;
+  
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #545f7d;
+    }
+  
+    input,
+    select {
+      width: 100%;
+      height: 40px;
+      border: 1px solid rgba(33, 63, 125, 0.2);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 0 12px;
+      font-size: 14px;
+      color: #545f7d;
+      outline: none;
+  
+      &::placeholder {
+        color: rgba(84, 95, 125, 0.6);
+      }
+  
+      &:focus {
+        border-color: #39cdcc;
+      }
+    }
+  }
+  
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  
+  .resetButton,
+  .filterButton {
+    flex: 1;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  .resetButton {
+    background: transparent;
+    color: #545f7d;
+    border: 1px solid #545f7d;
+  }
+  
+  .filterButton {
+    background: #39cdcc;
+    color: #ffffff;
+    border: none;
+  }
+  
+  .headerButton,
+  .headerLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #545f7d;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  
+  .headerButton {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+  
+  .filterIcon {
+    font-size: 12px;
+    cursor: pointer;
+  }
+  
+  .statusBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 90px;
+    height: 30px;
+    border-radius: 100px;
+    padding: 0 14px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .inactive {
+    color: #545f7d;
+    background: rgba(84, 95, 125, 0.1);
+  }
+  
+  .pending {
+    color: #e9b200;
+    background: rgba(233, 178, 0, 0.1);
+  }
+  
+  .blacklisted {
+    color: #e4033b;
+    background: rgba(228, 3, 59, 0.1);
+  }
+  
+  .active {
+    color: #39cd62;
+    background: rgba(57, 205, 98, 0.1);
+  }
+  
+  .actionButton {
+    border: none;
+    background: transparent;
+    color: #545f7d;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+  }
+  
+  @media (max-width: 1024px) {
+    .filterCard {
+      position: static;
+      width: 100%;
+      margin-bottom: 16px;
+    }
+  }

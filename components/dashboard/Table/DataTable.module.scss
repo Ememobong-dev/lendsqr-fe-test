@@ -1,0 +1,108 @@
+.wrapper {
+    width: 100%;
+  }
+  
+  .tableContainer {
+    width: 100%;
+    overflow-x: auto;
+    background: #ffffff;
+    border-radius: 4px;
+    box-shadow: 3px 5px 20px rgba(0, 0, 0, 0.04);
+  }
+  
+  .table {
+    width: 100%;
+    min-width: 1100px;
+    border-collapse: collapse;
+    background: #ffffff;
+  
+    thead tr {
+      border-bottom: 1px solid rgba(33, 63, 125, 0.1);
+    }
+  
+    th {
+      padding: 20px 24px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 14px;
+      color: #545f7d;
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+  
+    td {
+      padding: 18px 24px;
+      font-size: 14px;
+      line-height: 16px;
+      color: #545f7d;
+      border-bottom: 1px solid rgba(33, 63, 125, 0.1);
+      vertical-align: middle;
+    }
+  
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+  }
+  
+  .emptyState {
+    text-align: center;
+    padding: 32px 24px !important;
+    color: #545f7d;
+  }
+  
+  .footer {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .pageInfo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #545f7d;
+    font-size: 14px;
+  }
+  
+  .select {
+    height: 30px;
+    min-width: 80px;
+    border: none;
+    border-radius: 4px;
+    background: rgba(33, 63, 125, 0.1);
+    color: #213f7d;
+    padding: 0 10px;
+    outline: none;
+    cursor: pointer;
+  }
+  
+  .pagination {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .paginationButton {
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 4px;
+    background: rgba(33, 63, 125, 0.1);
+    color: #213f7d;
+    cursor: pointer;
+  
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+  
+  .pageNumber,
+  .pageDivider {
+    font-size: 14px;
+    color: #545f7d;
+  }

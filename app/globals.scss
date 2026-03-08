@@ -1,0 +1,80 @@
+@font-face {
+  font-family: "Avenir Next";
+  src: url("/Avenir-Next-Font/AvenirNextLTPro-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Avenir Next";
+  src: url("/Avenir-Next-Font/AvenirNextLTPro-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Avenir Next";
+  src: url("/Avenir-Next-Font/AvenirNextLTPro-Demi.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Avenir Next";
+  src: url("/Avenir-Next-Font/AvenirNextLTPro-Heavy.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --color-primary: #39cdcc;
+  --color-secondary: #213f7d;
+  --color-bg-left: #fbfbfb;
+  --color-bg-right: #ffffff;
+  --color-text-muted: #545f7d;
+  --color-input-border: #545F7D26;
+  
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  min-height: 100%;
+  font-family: "Avenir Next", Arial, Helvetica, sans-serif;
+  background: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+
+.table {
+  overflow-x: auto;
+  display: block;
+  }
+
+
+@media (max-width: 1024px) {
+
+  .sidebar {
+  display: none;
+  }
+  
+  .content {
+  padding: 20px;
+  }
+  
+  }

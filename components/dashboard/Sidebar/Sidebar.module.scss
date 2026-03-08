@@ -1,0 +1,115 @@
+.sidebar {
+  height: 100%;
+  background: #ffffff;
+}
+
+.navScrollArea {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 39px 0 30px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.navScrollArea::-webkit-scrollbar {
+  display: none;
+}
+
+.switchOrg {
+  width: 100%;
+  height: 40px;
+  padding: 0 30px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #213f7d;
+  font-size: 16px;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chevron {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.dashboardLinkWrap {
+  margin-top: 22px;
+  margin-bottom: 30px;
+}
+
+.dashboardLink {
+  height: 40px;
+  padding: 0 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #7a8cb1;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.section {
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  padding: 0 30px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  line-height: 14px;
+  font-weight: 500;
+  color: #545f7d;
+}
+
+.menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item,
+.activeItem {
+  position: relative;
+  height: 40px;
+  padding: 0 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.item {
+  color: #7a8cb1;
+}
+
+.activeItem {
+  color: #213f7d;
+  background: rgba(57, 205, 204, 0.06);
+}
+
+.activeItem::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background: #39cdcc;
+}
+
+.iconWrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  min-width: 16px;
+}
