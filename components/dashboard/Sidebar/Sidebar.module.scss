@@ -113,3 +113,13 @@
   width: 16px;
   min-width: 16px;
 }
+
+/* inactive item icons */
+.item .iconWrap {
+  opacity: 0.7;
+}
+
+/* active item icons */
+.activeItem .iconWrap {
+  opacity: 1;
+}

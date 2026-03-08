@@ -26,7 +26,7 @@ const customerItems: NavItem[] = [
 ];
 
 const businessItems: NavItem[] = [
-  { label: "Organization", href: "#", icon: "/icons/sidebar/organization.svg" },
+  { label: "Organization", href: "#", icon: "/icons/sidebar/briefcase.svg" },
   { label: "Loan Products", href: "#", icon: "/icons/sidebar/loan-requests.svg" },
   { label: "Savings Products", href: "#", icon: "/icons/sidebar/savings-products.svg" },
   { label: "Fees and Charges", href: "#", icon: "/icons/sidebar/fees-charges.svg" },

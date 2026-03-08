@@ -248,7 +248,7 @@ export default function UsersTable() {
       {
         id: "actions",
         header: "",
-        cell: () => <button className={styles.actionButton}>⋮</button>,
+        cell: () => <button className={styles.actionButton}><Image src={'/icons/users-dash/vertical-elipse.svg'} alt="icon" width={16} height={16} /></button>,
       },
     ],
     []
