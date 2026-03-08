@@ -186,7 +186,66 @@
     font-size: 20px;
     line-height: 1;
   }
+  .feedbackState {
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #545f7d;
+    background: #ffffff;
+    border-radius: 4px;
+    box-shadow: 3px 5px 20px rgba(0, 0, 0, 0.04);
+  }
   
+  .actionCell {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    overflow: visible;
+  }
+  
+  .actionButton {
+    border: none;
+    background: transparent;
+    color: #545f7d;
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .actionMenu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 50;
+    width: 180px;
+    background: #ffffff;
+    border-radius: 4px;
+    box-shadow: 3px 5px 20px rgba(0, 0, 0, 0.08);
+    padding: 12px 0;
+  }
+  
+  .actionMenuItem {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #545f7d;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+  
+    &:hover {
+      background: rgba(57, 205, 204, 0.06);
+    }
+  }
   @media (max-width: 1024px) {
     .filterCard {
       position: static;

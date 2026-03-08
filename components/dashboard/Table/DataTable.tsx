@@ -5,8 +5,6 @@ import {
   PaginationState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import styles from "./DataTable.module.scss";
@@ -16,9 +14,28 @@ type DataTableProps<T> = {
   columns: ColumnDef<T, unknown>[];
   showFooterPagination?: boolean;
   pageSizeOptions?: number[];
-  pagination?: PaginationState;
-  onPaginationChange?: (pagination: PaginationState) => void;
+  pagination: PaginationState;
+  onPaginationChange: (pagination: PaginationState) => void;
+  manualPagination?: boolean;
+  totalItems?: number;
+  totalPages?: number;
 };
+
+function buildPaginationRange(currentPage: number, totalPages: number): (number | string)[] {
+  if (totalPages <= 6) {
+    return Array.from({ length: totalPages }, (item, index) => index + 1);
+  }
+
+  if (currentPage <= 3) {
+    return [1, 2, 3, "...", totalPages - 1, totalPages];
+  }
+
+  if (currentPage >= totalPages - 2) {
+    return [1, 2, "...", totalPages - 2, totalPages - 1, totalPages];
+  }
+
+  return [1, "...", currentPage, "...", totalPages - 1, totalPages];
+}
 
 export default function DataTable<T>({
   data,
@@ -27,36 +44,29 @@ export default function DataTable<T>({
   pageSizeOptions = [10, 25, 50, 100],
   pagination,
   onPaginationChange,
+  manualPagination = false,
+  totalItems = data.length,
+  totalPages,
 }: DataTableProps<T>) {
-  const controlledPagination = pagination ?? {
-    pageIndex: 0,
-    pageSize: 10,
-  };
-
   const table = useReactTable({
     data,
     columns,
-    state: {
-      pagination: controlledPagination,
-    },
+    state: { pagination },
     onPaginationChange: (updater) => {
-      if (!onPaginationChange) return;
-
-      const nextValue =
-        typeof updater === "function"
-          ? updater(controlledPagination)
-          : updater;
-
-      onPaginationChange(nextValue);
+      const next =
+        typeof updater === "function" ? updater(pagination) : updater;
+      onPaginationChange(next);
     },
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    manualPagination: false,
+    manualPagination,
+    pageCount: totalPages,
   });
 
-  const currentPage = table.getState().pagination.pageIndex + 1;
-  const totalPages = table.getPageCount();
+  const currentPage = pagination.pageIndex + 1;
+  const computedTotalPages =
+    totalPages ?? Math.max(1, Math.ceil(totalItems / pagination.pageSize));
+
+  const paginationRange = buildPaginationRange(currentPage, computedTotalPages);
 
   return (
     <div className={styles.wrapper}>
@@ -80,7 +90,7 @@ export default function DataTable<T>({
           </thead>
 
           <tbody>
-            {table.getRowModel().rows.length > 0 ? (
+            {data.length > 0 ? (
               table.getRowModel().rows.map((row) => (
                 <tr key={row.id}>
                   {row.getVisibleCells().map((cell) => (
@@ -110,8 +120,13 @@ export default function DataTable<T>({
             <span>Showing</span>
 
             <select
-              value={table.getState().pagination.pageSize}
-              onChange={(e) => table.setPageSize(Number(e.target.value))}
+              value={pagination.pageSize}
+              onChange={(e) =>
+                onPaginationChange({
+                  pageIndex: 0,
+                  pageSize: Number(e.target.value),
+                })
+              }
               className={styles.select}
             >
               {pageSizeOptions.map((size) => (
@@ -121,28 +136,66 @@ export default function DataTable<T>({
               ))}
             </select>
 
-            <span>out of {data.length}</span>
+            <span>out of {totalItems}</span>
           </div>
 
           <div className={styles.pagination}>
             <button
               type="button"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
               className={styles.paginationButton}
+              disabled={currentPage <= 1}
+              onClick={() =>
+                onPaginationChange({
+                  pageIndex: pagination.pageIndex - 1,
+                  pageSize: pagination.pageSize,
+                })
+              }
+              aria-label="Previous page"
             >
               ‹
             </button>
 
-            <span className={styles.pageNumber}>{currentPage}</span>
-            <span className={styles.pageDivider}>of</span>
-            <span className={styles.pageNumber}>{totalPages || 1}</span>
+            <div className={styles.paginationNumbers}>
+              {paginationRange.map((item, index) => {
+                if (item === "...") {
+                  return (
+                    <span key={`ellipsis-${index}`} className={styles.ellipsis}>
+                      ...
+                    </span>
+                  );
+                }
+
+                const isActive = item === currentPage;
+
+                return (
+                  <button
+                    key={item}
+                    type="button"
+                    className={`${styles.pageNumber} ${isActive ? styles.activePage : ""}`}
+                    onClick={() =>
+                      onPaginationChange({
+                        pageIndex: (item as number) - 1,
+                        pageSize: pagination.pageSize,
+                      })
+                    }
+                  >
+                    {item}
+                  </button>
+                );
+              })}
+            </div>
 
             <button
               type="button"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
               className={styles.paginationButton}
+              disabled={currentPage >= computedTotalPages}
+              onClick={() =>
+                onPaginationChange({
+                  pageIndex: pagination.pageIndex + 1,
+                  pageSize: pagination.pageSize,
+                })
+              }
+              aria-label="Next page"
             >
               ›
             </button>
