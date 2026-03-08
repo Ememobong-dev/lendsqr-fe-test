@@ -227,28 +227,28 @@ export default function UsersTable() {
                         setOpenActionMenuId(null);
                       }}
                     >
-                      <Image src="/icons/users-dash/view-details.svg" alt="" width={16} height={16} />
+                      <Image src="/icons/eye.svg" alt="" width={16} height={16} />
                       <span>View Details</span>
                     </Link>
                   )}
 
                   {actionItems.includes("blacklist-user") && (
                     <button type="button" className={styles.actionMenuItem}>
-                      <Image src="/icons/users-dash/blacklist-user.svg" alt="" width={16} height={16} />
+                      <Image src="/icons/blacklist-user.svg" alt="" width={16} height={16} />
                       <span>Blacklist User</span>
                     </button>
                   )}
 
                   {actionItems.includes("activate-user") && (
                     <button type="button" className={styles.actionMenuItem}>
-                      <Image src="/icons/users-dash/activate-user.svg" alt="" width={16} height={16} />
+                      <Image src="/icons/activate-user.svg" alt="" width={16} height={16} />
                       <span>Activate User</span>
                     </button>
                   )}
 
                   {actionItems.includes("deactivate-user") && (
                     <button type="button" className={styles.actionMenuItem}>
-                      <Image src="/icons/users-dash/activate-user.svg" alt="" width={16} height={16} />
+                      <Image src="/icons/blacklist-user.svg" alt="" width={16} height={16} />
                       <span>Deactivate User</span>
                     </button>
                   )}
