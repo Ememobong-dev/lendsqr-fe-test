@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import styles from "./LoginForm.module.scss";
+import { avenir } from "@/lib/fonts";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className={styles.wrapper}>
+    <div className={`${styles.wrapper} ${avenir.className}`}>
       <h1 className={styles.title}>Welcome!</h1>
       <p className={styles.subtitle}>Enter details to login.</p>
 
@@ -30,9 +31,7 @@ export default function LoginForm() {
             className={styles.showButton}
             onClick={() => setShowPassword((prev) => !prev)}
           >
-            {
-              showPassword ? "HIDE" : "SHOW"
-            }
+            {showPassword ? "HIDE" : "SHOW"}
           </button>
         </div>
 
