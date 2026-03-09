@@ -14,11 +14,12 @@ type FilterState = {
   organization: string;
   username: string;
   email: string;
-  date: string;
   phoneNumber: string;
+  dateJoined: string;
   status: string;
 };
 
+type FilterFieldKey = keyof FilterState;
 
 type UserAction =
   | "view-details"
@@ -26,14 +27,61 @@ type UserAction =
   | "activate-user"
   | "deactivate-user";
 
+type FilterFieldConfig = {
+  key: FilterFieldKey;
+  label: string;
+  type: "text" | "email" | "select";
+  placeholder?: string;
+  options?: string[];
+};
+
 const defaultFilters: FilterState = {
   organization: "",
   username: "",
   email: "",
-  date: "",
   phoneNumber: "",
+  dateJoined: "",
   status: "",
 };
+
+const filterFieldConfigs: FilterFieldConfig[] = [
+  {
+    key: "organization",
+    label: "Organization",
+    type: "text",
+    placeholder: "Select",
+  },
+  {
+    key: "username",
+    label: "Username",
+    type: "text",
+    placeholder: "User",
+  },
+  {
+    key: "email",
+    label: "Email",
+    type: "email",
+    placeholder: "Email",
+  },
+  {
+    key: "dateJoined",
+    label: "Date Joined",
+    type: "text",
+    placeholder: "Date",
+  },
+  {
+    key: "phoneNumber",
+    label: "Phone Number",
+    type: "text",
+    placeholder: "Phone Number",
+  },
+  {
+    key: "status",
+    label: "Status",
+    type: "select",
+    options: ["Inactive", "Pending", "Blacklisted", "Active"],
+  },
+];
 
 function statusClassName(status: UserStatus) {
   switch (status) {
@@ -62,20 +110,36 @@ function getActionItems(status: UserStatus): UserAction[] {
   }
 }
 
+function reorderFilterFields(
+  fields: FilterFieldConfig[],
+  priorityKey: FilterFieldKey | null
+) {
+  if (!priorityKey) return fields;
+
+  const priorityField = fields.find((field) => field.key === priorityKey);
+  const remainingFields = fields.filter((field) => field.key !== priorityKey);
+
+  return priorityField ? [priorityField, ...remainingFields] : fields;
+}
+
 export default function UsersTable() {
   const [data, setData] = useState<UserRecord[]>([]);
   const [total, setTotal] = useState(0);
   const [showFilter, setShowFilter] = useState(false);
+  const [activeFilterField, setActiveFilterField] =
+    useState<FilterFieldKey | null>("organization");
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
+  const [filterLeft, setFilterLeft] = useState(14);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
 
   const actionMenuRef = useRef<HTMLDivElement | null>(null);
+  const tableAreaRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -100,7 +164,12 @@ export default function UsersTable() {
         const response = await fetchUsers({
           page: pagination.pageIndex + 1,
           limit: pagination.pageSize,
-          ...filters,
+          organization: filters.organization,
+          username: filters.username,
+          email: filters.email,
+          phoneNumber: filters.phoneNumber,
+          date: filters.dateJoined,
+          status: filters.status,
         });
 
         setData(response.data);
@@ -116,6 +185,28 @@ export default function UsersTable() {
     loadUsers();
   }, [pagination.pageIndex, pagination.pageSize, filters]);
 
+  const orderedFilterFields = useMemo(
+    () => reorderFilterFields(filterFieldConfigs, activeFilterField),
+    [activeFilterField]
+  );
+
+  const openFilterForField = (
+    fieldKey: FilterFieldKey,
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    setActiveFilterField(fieldKey);
+    setShowFilter(true);
+
+    const buttonRect = event.currentTarget.getBoundingClientRect();
+    const containerRect = tableAreaRef.current?.getBoundingClientRect();
+
+    if (!containerRect) return;
+
+    const nextLeft = buttonRect.left - containerRect.left;
+
+    setFilterLeft(nextLeft);
+  };
+
   const columns = useMemo<ColumnDef<UserRecord>[]>(
     () => [
       {
@@ -124,11 +215,16 @@ export default function UsersTable() {
           <button
             type="button"
             className={styles.headerButton}
-            onClick={() => setShowFilter((prev) => !prev)}
+            onClick={(event) => openFilterForField("organization", event)}
           >
             ORGANIZATION
             <span className={styles.filterIcon}>
-              <Image src="/icons/users-dash/filter-icon.svg" width={14} height={14} alt="filter icon" />
+              <Image
+                src="/icons/users-dash/filter-icon.svg"
+                width={14}
+                height={14}
+                alt="filter icon"
+              />
             </span>
           </button>
         ),
@@ -136,59 +232,108 @@ export default function UsersTable() {
       {
         accessorKey: "username",
         header: () => (
-          <div className={styles.headerLabel}>
+          <button
+            type="button"
+            className={styles.headerButton}
+            onClick={(event) => openFilterForField("username", event)}
+          >
             USERNAME
             <span className={styles.filterIcon}>
-              <Image src="/icons/users-dash/filter-icon.svg" width={14} height={14} alt="filter icon" />
+              <Image
+                src="/icons/users-dash/filter-icon.svg"
+                width={14}
+                height={14}
+                alt="filter icon"
+              />
             </span>
-          </div>
+          </button>
         ),
       },
       {
         accessorKey: "email",
         header: () => (
-          <div className={styles.headerLabel}>
+          <button
+            type="button"
+            className={styles.headerButton}
+            onClick={(event) => openFilterForField("email", event)}
+          >
             EMAIL
             <span className={styles.filterIcon}>
-              <Image src="/icons/users-dash/filter-icon.svg" width={14} height={14} alt="filter icon" />
+              <Image
+                src="/icons/users-dash/filter-icon.svg"
+                width={14}
+                height={14}
+                alt="filter icon"
+              />
             </span>
-          </div>
+          </button>
         ),
       },
       {
         accessorKey: "phoneNumber",
         header: () => (
-          <div className={styles.headerLabel}>
+          <button
+            type="button"
+            className={styles.headerButton}
+            onClick={(event) => openFilterForField("phoneNumber", event)}
+          >
             PHONE NUMBER
             <span className={styles.filterIcon}>
-              <Image src="/icons/users-dash/filter-icon.svg" width={14} height={14} alt="filter icon" />
+              <Image
+                src="/icons/users-dash/filter-icon.svg"
+                width={14}
+                height={14}
+                alt="filter icon"
+              />
             </span>
-          </div>
+          </button>
         ),
       },
       {
         accessorKey: "dateJoined",
         header: () => (
-          <div className={styles.headerLabel}>
+          <button
+            type="button"
+            className={styles.headerButton}
+            onClick={(event) => openFilterForField("dateJoined", event)}
+          >
             DATE JOINED
             <span className={styles.filterIcon}>
-              <Image src="/icons/users-dash/filter-icon.svg" width={14} height={14} alt="filter icon" />
+              <Image
+                src="/icons/users-dash/filter-icon.svg"
+                width={14}
+                height={14}
+                alt="filter icon"
+              />
             </span>
-          </div>
+          </button>
         ),
       },
       {
         accessorKey: "status",
         header: () => (
-          <div className={styles.headerLabel}>
+          <button
+            type="button"
+            className={styles.headerButton}
+            onClick={(event) => openFilterForField("status", event)}
+          >
             STATUS
             <span className={styles.filterIcon}>
-              <Image src="/icons/users-dash/filter-icon.svg" width={14} height={14} alt="filter icon" />
+              <Image
+                src="/icons/users-dash/filter-icon.svg"
+                width={14}
+                height={14}
+                alt="filter icon"
+              />
             </span>
-          </div>
+          </button>
         ),
         cell: ({ row }) => (
-          <span className={`${styles.statusBadge} ${statusClassName(row.original.status)}`}>
+          <span
+            className={`${styles.statusBadge} ${statusClassName(
+              row.original.status
+            )}`}
+          >
             {row.original.status}
           </span>
         ),
@@ -206,7 +351,9 @@ export default function UsersTable() {
               <button
                 type="button"
                 className={styles.actionButton}
-                onClick={() => setOpenActionMenuId((prev) => (prev === user.id ? null : user.id))}
+                onClick={() =>
+                  setOpenActionMenuId((prev) => (prev === user.id ? null : user.id))
+                }
               >
                 <Image
                   src="/icons/users-dash/vertical-elipse.svg"
@@ -217,7 +364,11 @@ export default function UsersTable() {
               </button>
 
               {isOpen && (
-                <div className={styles.actionMenu}>
+                <div
+                  className={`${styles.actionMenu} ${
+                    row.index >= data.length - 2 ? styles.actionMenuUp : ""
+                  }`}
+                >
                   {actionItems.includes("view-details") && (
                     <Link
                       href={`/users/${user.slug}`}
@@ -227,28 +378,48 @@ export default function UsersTable() {
                         setOpenActionMenuId(null);
                       }}
                     >
-                      <Image src="/icons/eye.svg" alt="" width={16} height={16} />
+                      <Image
+                        src="/icons/eye.svg"
+                        alt=""
+                        width={16}
+                        height={16}
+                      />
                       <span>View Details</span>
                     </Link>
                   )}
 
                   {actionItems.includes("blacklist-user") && (
                     <button type="button" className={styles.actionMenuItem}>
-                      <Image src="/icons/blacklist-user.svg" alt="" width={16} height={16} />
+                      <Image
+                        src="/icons/blacklist-user.svg"
+                        alt=""
+                        width={16}
+                        height={16}
+                      />
                       <span>Blacklist User</span>
                     </button>
                   )}
 
                   {actionItems.includes("activate-user") && (
                     <button type="button" className={styles.actionMenuItem}>
-                      <Image src="/icons/activate-user.svg" alt="" width={16} height={16} />
+                      <Image
+                        src="/icons/activate-user.svg"
+                        alt=""
+                        width={16}
+                        height={16}
+                      />
                       <span>Activate User</span>
                     </button>
                   )}
 
                   {actionItems.includes("deactivate-user") && (
                     <button type="button" className={styles.actionMenuItem}>
-                      <Image src="/icons/blacklist-user.svg" alt="" width={16} height={16} />
+                      <Image
+                        src="/icons/blacklist-user.svg"
+                        alt=""
+                        width={16}
+                        height={16}
+                      />
                       <span>Deactivate User</span>
                     </button>
                   )}
@@ -259,68 +430,83 @@ export default function UsersTable() {
         },
       },
     ],
-    [openActionMenuId]
+    [openActionMenuId, data.length]
   );
 
-  const handleFilterChange = (key: keyof FilterState, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  const handleFilterChange = (key: FilterFieldKey, value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+    setPagination((prev) => ({
+      ...prev,
+      pageIndex: 0,
+    }));
   };
 
   const handleReset = () => {
     setFilters(defaultFilters);
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    setPagination((prev) => ({
+      ...prev,
+      pageIndex: 0,
+    }));
   };
 
   const totalPages = Math.max(1, Math.ceil(total / pagination.pageSize));
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.tableArea}>
+      <div className={styles.tableArea} ref={tableAreaRef}>
         {showFilter && (
-          <div className={styles.filterCard}>
-            <div className={styles.field}>
-              <label>Organization</label>
-              <input type="text" placeholder="Select" value={filters.organization} onChange={(e) => handleFilterChange("organization", e.target.value)} />
-            </div>
+          <div
+            className={styles.filterCard}
+            style={{ left: `${filterLeft}px` }}
+          >
+            {orderedFilterFields.map((field) => (
+              <div className={styles.field} key={field.key}>
+                <label>{field.label}</label>
 
-            <div className={styles.field}>
-              <label>Username</label>
-              <input type="text" placeholder="User" value={filters.username} onChange={(e) => handleFilterChange("username", e.target.value)} />
-            </div>
-
-            <div className={styles.field}>
-              <label>Email</label>
-              <input type="email" placeholder="Email" value={filters.email} onChange={(e) => handleFilterChange("email", e.target.value)} />
-            </div>
-
-            <div className={styles.field}>
-              <label>Date</label>
-              <input type="text" placeholder="Date" value={filters.date} onChange={(e) => handleFilterChange("date", e.target.value)} />
-            </div>
-
-            <div className={styles.field}>
-              <label>Phone Number</label>
-              <input type="text" placeholder="Phone Number" value={filters.phoneNumber} onChange={(e) => handleFilterChange("phoneNumber", e.target.value)} />
-            </div>
-
-            <div className={styles.field}>
-              <label>Status</label>
-              <select value={filters.status} onChange={(e) => handleFilterChange("status", e.target.value)}>
-                <option value="">Select</option>
-                <option value="Inactive">Inactive</option>
-                <option value="Pending">Pending</option>
-                <option value="Blacklisted">Blacklisted</option>
-                <option value="Active">Active</option>
-              </select>
-            </div>
+                {field.type === "select" ? (
+                  <select
+                    value={filters[field.key]}
+                    onChange={(e) =>
+                      handleFilterChange(field.key, e.target.value)
+                    }
+                  >
+                    <option value="">Select</option>
+                    {field.options?.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type={field.type}
+                    placeholder={field.placeholder}
+                    value={filters[field.key]}
+                    onChange={(e) =>
+                      handleFilterChange(field.key, e.target.value)
+                    }
+                  />
+                )}
+              </div>
+            ))}
 
             <div className={styles.actions}>
-              <button type="button" className={styles.resetButton} onClick={handleReset}>
+              <button
+                type="button"
+                className={styles.resetButton}
+                onClick={handleReset}
+              >
                 Reset
               </button>
 
-              <button type="button" className={styles.filterButton} onClick={() => setShowFilter(false)}>
+              <button
+                type="button"
+                className={styles.filterButton}
+                onClick={() => setShowFilter(false)}
+              >
                 Filter
               </button>
             </div>

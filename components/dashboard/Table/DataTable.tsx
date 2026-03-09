@@ -21,20 +21,34 @@ type DataTableProps<T> = {
   totalPages?: number;
 };
 
-function buildPaginationRange(currentPage: number, totalPages: number): (number | string)[] {
-  if (totalPages <= 6) {
-    return Array.from({ length: totalPages }, (item, index) => index + 1);
+function buildChunkedPagination(currentPage: number, totalPages: number, chunkSize = 5) {
+  const chunkIndex = Math.floor((currentPage - 1) / chunkSize);
+  const startPage = chunkIndex * chunkSize + 1;
+  const endPage = Math.min(startPage + chunkSize - 1, totalPages);
+
+  const pages: (number | string)[] = [];
+
+  if (startPage > 1) {
+    pages.push(1);
+
+    if (startPage > 2) {
+      pages.push("...");
+    }
   }
 
-  if (currentPage <= 3) {
-    return [1, 2, 3, "...", totalPages - 1, totalPages];
+  for (let page = startPage; page <= endPage; page += 1) {
+    pages.push(page);
   }
 
-  if (currentPage >= totalPages - 2) {
-    return [1, 2, "...", totalPages - 2, totalPages - 1, totalPages];
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) {
+      pages.push("...");
+    }
+
+    pages.push(totalPages);
   }
 
-  return [1, "...", currentPage, "...", totalPages - 1, totalPages];
+  return pages;
 }
 
 export default function DataTable<T>({
@@ -48,6 +62,11 @@ export default function DataTable<T>({
   totalItems = data.length,
   totalPages,
 }: DataTableProps<T>) {
+  const computedTotalPages =
+    totalPages ?? Math.max(1, Math.ceil(totalItems / pagination.pageSize));
+
+  const currentPage = pagination.pageIndex + 1;
+
   const table = useReactTable({
     data,
     columns,
@@ -59,59 +78,57 @@ export default function DataTable<T>({
     },
     getCoreRowModel: getCoreRowModel(),
     manualPagination,
-    pageCount: totalPages,
+    pageCount: computedTotalPages,
   });
 
-  const currentPage = pagination.pageIndex + 1;
-  const computedTotalPages =
-    totalPages ?? Math.max(1, Math.ceil(totalItems / pagination.pageSize));
-
-  const paginationRange = buildPaginationRange(currentPage, computedTotalPages);
+  const paginationRange = buildChunkedPagination(currentPage, computedTotalPages, 5);
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.tableContainer}>
-        <table className={styles.table}>
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-
-          <tbody>
-            {data.length > 0 ? (
-              table.getRowModel().rows.map((row) => (
-                <tr key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
+      <div className={styles.tableScroll}>
+        <div className={styles.tableContainer}>
+          <table className={styles.table}>
+            <thead>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </th>
                   ))}
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td className={styles.emptyState} colSpan={columns.length}>
-                  No records found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              ))}
+            </thead>
+
+            <tbody>
+              {data.length > 0 ? (
+                table.getRowModel().rows.map((row) => (
+                  <tr key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td className={styles.emptyState} colSpan={columns.length}>
+                    No records found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {showFooterPagination && (
@@ -171,7 +188,9 @@ export default function DataTable<T>({
                   <button
                     key={item}
                     type="button"
-                    className={`${styles.pageNumber} ${isActive ? styles.activePage : ""}`}
+                    className={`${styles.pageNumber} ${
+                      isActive ? styles.activePage : ""
+                    }`}
                     onClick={() =>
                       onPaginationChange({
                         pageIndex: (item as number) - 1,
