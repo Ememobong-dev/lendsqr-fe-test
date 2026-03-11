@@ -1,116 +1,116 @@
-.wrapper {
+.formCard {
   width: 100%;
-}
 
-.title {
-  font-size: 40px;
-  line-height: 1.37;
-  font-weight: 700;
-  color: var(--color-secondary);
-  margin-bottom: 10px;
-}
+  &__title {
+    margin-bottom: 10px;
+    color: var(--color-secondary);
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 1.37;
+  }
 
-.subtitle {
-  font-size: 20px;
-  line-height: 1.35;
-  font-weight: 400;
-  color: var(--color-text-muted);
-  margin-bottom: 60px;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.fieldGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.input {
-  width: 100%;
-  height: 50px;
-  border: 2px solid var(--color-input-border);
-  border-radius: 5px;
-  padding: 0 16px;
-  background: #fff;
-  outline: none;
-  color: #213f7d;
-  transition: border-color 0.2s ease;
-
-  &::placeholder {
+  &__subtitle {
+    margin-bottom: 60px;
     color: var(--color-text-muted);
-    font-size: 14px;
     font-weight: 400;
+    font-size: 20px;
+    line-height: 1.35;
   }
 
-  &:focus {
-    border-color: var(--color-primary);
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
   }
-}
 
-.inputError {
-  border-color: #e4033b;
-
-  &:focus {
-    border-color: #e4033b;
+  &__fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
-}
 
-.errorText {
-  font-size: 12px;
-  line-height: 16px;
-  color: #e4033b;
-  margin: 0;
-}
+  &__passwordField {
+    position: relative;
+  }
 
-.passwordField {
-  position: relative;
-}
+  &__input {
+    width: 100%;
+    height: 50px;
+    border: 2px solid var(--color-input-border);
+    border-radius: 5px;
+    background: #fff;
+    padding: 0 16px;
+    color: #213f7d;
+    outline: none;
+    transition: border-color 0.2s ease;
 
-.showButton {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  border: none;
-  background: transparent;
-  color: var(--color-primary);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-}
+    &::placeholder {
+      color: var(--color-text-muted);
+      font-weight: 400;
+      font-size: 14px;
+    }
 
-.forgotPassword {
-  width: fit-content;
-  border: none;
-  background: transparent;
-  color: var(--color-primary);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-}
+    &:focus {
+      border-color: var(--color-primary);
+    }
 
-.loginButton {
-  width: 100%;
-  height: 48px;
-  border: none;
-  border-radius: 8px;
-  background: var(--color-primary);
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
+    &--error {
+      border-color: #e4033b;
 
-  &:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
+      &:focus {
+        border-color: #e4033b;
+      }
+    }
+  }
+
+  &__errorText {
+    margin: 0;
+    color: #e4033b;
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  &__showButton {
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: var(--color-primary);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+  }
+
+  &__forgotPassword {
+    width: fit-content;
+    border: none;
+    background: transparent;
+    color: var(--color-primary);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+  }
+
+  &__loginButton {
+    width: 100%;
+    height: 48px;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
   }
 }

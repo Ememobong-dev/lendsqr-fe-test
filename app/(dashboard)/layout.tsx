@@ -1,24 +1,27 @@
+import type { ReactNode } from "react";
 import Sidebar from "@/components/dashboard/Sidebar/Sidebar";
 import Topbar from "@/components/dashboard/Topbar/Topbar";
 import styles from "./dashboard-layout.module.scss";
 
+type DashboardLayoutProps = {
+  children: ReactNode;
+};
+
 export default function DashboardLayout({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+}: DashboardLayoutProps) {
   return (
     <div className={styles.layout}>
-      <header className={styles.topbarPane}>
+      <header className={styles.layout__topbar}>
         <Topbar />
       </header>
 
-      <div className={styles.bodyPane}>
-        <aside className={styles.sidebarPane}>
+      <div className={styles.layout__body}>
+        <aside className={styles.layout__sidebar}>
           <Sidebar />
         </aside>
 
-        <main className={styles.contentPane}>{children}</main>
+        <main className={styles.layout__content}>{children}</main>
       </div>
     </div>
   );

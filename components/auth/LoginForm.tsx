@@ -1,43 +1,89 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from "./LoginForm.module.scss";
 import { avenir } from "@/lib/fonts";
+import styles from "./LoginForm.module.scss";
 
-function isValidEmail(email: string) {
+type LoginFormFields = {
+  email: string;
+  password: string;
+};
+
+type LoginFormTouched = {
+  email: boolean;
+  password: boolean;
+};
+
+function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 export default function LoginForm() {
   const router = useRouter();
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [touched, setTouched] = useState({
+  const [fields, setFields] = useState<LoginFormFields>({
+    email: "",
+    password: "",
+  });
+
+  const [touched, setTouched] = useState<LoginFormTouched>({
     email: false,
     password: false,
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const emailError = useMemo(() => {
-    if (!touched.email) return "";
-    if (!email.trim()) return "Email is required";
-    if (!isValidEmail(email.trim())) return "Enter a valid email address";
-    return "";
-  }, [email, touched.email]);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const passwordError = useMemo(() => {
-    if (!touched.password) return "";
-    if (!password) return "Password is required";
-    if (password.length < 8) return "Password must be at least 8 characters";
-    return "";
-  }, [password, touched.password]);
+  const normalizedEmail = fields.email.trim();
 
-  const isFormValid = isValidEmail(email.trim()) && password.length >= 8;
+  const errors = useMemo(() => {
+    const emailError = !touched.email
+      ? ""
+      : !normalizedEmail
+        ? "Email is required"
+        : !isValidEmail(normalizedEmail)
+          ? "Enter a valid email address"
+          : "";
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    const passwordError = !touched.password
+      ? ""
+      : !fields.password
+        ? "Password is required"
+        : fields.password.length < 8
+          ? "Password must be at least 8 characters"
+          : "";
+
+    return {
+      email: emailError,
+      password: passwordError,
+    };
+  }, [fields.password, normalizedEmail, touched.email, touched.password]);
+
+  const isFormValid =
+    isValidEmail(normalizedEmail) && fields.password.length >= 8;
+
+  const handleFieldChange =
+    (field: keyof LoginFormFields) =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const { value } = event.target;
+
+      setFields((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    };
+
+  const handleFieldBlur = (field: keyof LoginFormTouched) => {
+    setTouched((prev) => ({
+      ...prev,
+      [field]: true,
+    }));
+  };
+
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>
+  ): Promise<void> => {
     event.preventDefault();
 
     setTouched({
@@ -45,11 +91,12 @@ export default function LoginForm() {
       password: true,
     });
 
-    if (!isFormValid) return;
+    if (!isFormValid) {
+      return;
+    }
 
     try {
       setIsSubmitting(true);
-
       router.push("/users");
     } finally {
       setIsSubmitting(false);
@@ -57,75 +104,77 @@ export default function LoginForm() {
   };
 
   return (
-    <div className={`${styles.wrapper} ${avenir.className}`}>
-      <h1 className={styles.title}>Welcome!</h1>
-      <p className={styles.subtitle}>Enter details to login.</p>
+    <div className={`${styles.formCard} ${avenir.className}`}>
+      <h1 className={styles.formCard__title}>Welcome!</h1>
+      <p className={styles.formCard__subtitle}>Enter details to login.</p>
 
-      <form className={styles.form} onSubmit={handleSubmit} noValidate>
-        <div className={styles.fieldGroup}>
+      <form className={styles.formCard__form} onSubmit={handleSubmit} noValidate>
+        <div className={styles.formCard__fieldGroup}>
           <input
             type="email"
             placeholder="Email"
-            className={`${styles.input} ${emailError ? styles.inputError : ""}`}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onBlur={() =>
-              setTouched((prev) => ({
-                ...prev,
-                email: true,
-              }))
-            }
-            aria-invalid={Boolean(emailError)}
-            aria-describedby={emailError ? "email-error" : undefined}
+            className={`${styles.formCard__input} ${
+              errors.email ? styles["formCard__input--error"] : ""
+            }`}
+            value={fields.email}
+            onChange={handleFieldChange("email")}
+            onBlur={() => handleFieldBlur("email")}
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby={errors.email ? "email-error" : undefined}
+            autoComplete="email"
           />
-          {emailError ? (
-            <p id="email-error" className={styles.errorText}>
-              {emailError}
+
+          {errors.email ? (
+            <p id="email-error" className={styles.formCard__errorText}>
+              {errors.email}
             </p>
           ) : null}
         </div>
 
-        <div className={styles.fieldGroup}>
-          <div className={styles.passwordField}>
+        <div className={styles.formCard__fieldGroup}>
+          <div className={styles.formCard__passwordField}>
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Password"
-              className={`${styles.input} ${passwordError ? styles.inputError : ""}`}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onBlur={() =>
-                setTouched((prev) => ({
-                  ...prev,
-                  password: true,
-                }))
-              }
-              aria-invalid={Boolean(passwordError)}
-              aria-describedby={passwordError ? "password-error" : undefined}
+              className={`${styles.formCard__input} ${
+                errors.password ? styles["formCard__input--error"] : ""
+              }`}
+              value={fields.password}
+              onChange={handleFieldChange("password")}
+              onBlur={() => handleFieldBlur("password")}
+              aria-invalid={Boolean(errors.password)}
+              aria-describedby={errors.password ? "password-error" : undefined}
+              autoComplete="current-password"
             />
 
             <button
               type="button"
-              className={styles.showButton}
+              className={styles.formCard__showButton}
               onClick={() => setShowPassword((prev) => !prev)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
             >
               {showPassword ? "HIDE" : "SHOW"}
             </button>
           </div>
 
-          {passwordError ? (
-            <p id="password-error" className={styles.errorText}>
-              {passwordError}
+          {errors.password ? (
+            <p id="password-error" className={styles.formCard__errorText}>
+              {errors.password}
             </p>
           ) : null}
         </div>
 
-        <button type="button" className={styles.forgotPassword}>
+        <button
+          type="button"
+          className={styles.formCard__forgotPassword}
+        >
           FORGOT PASSWORD?
         </button>
 
         <button
           type="submit"
-          className={styles.loginButton}
+          className={styles.formCard__loginButton}
           disabled={isSubmitting}
         >
           {isSubmitting ? "LOGGING IN..." : "LOG IN"}

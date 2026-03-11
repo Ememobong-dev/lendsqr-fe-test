@@ -1,175 +1,177 @@
-.wrapper {
-  width: 100%;
+.tableBlock {
   position: relative;
-  overflow: visible;
-}
-
-.tableScroll {
   width: 100%;
-  overflow-x: auto;
-  overflow-y: visible;
-}
-
-.tableContainer {
-  min-width: 1100px;
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 3px 5px 20px rgba(0, 0, 0, 0.04);
-  position: relative;
-  overflow: visible;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #ffffff;
   overflow: visible;
 
-  thead tr {
+  &__scroll {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+
+  &__container {
+    position: relative;
+    min-width: 1100px;
+    overflow: visible;
+    border-radius: 4px;
+    background: #ffffff;
+    box-shadow: 3px 5px 20px rgba(0, 0, 0, 0.04);
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    overflow: visible;
+    background: #ffffff;
+  }
+
+  &__headRow {
     border-bottom: 1px solid rgba(33, 63, 125, 0.1);
   }
 
-  th {
+  &__headCell {
     padding: 20px 24px;
-    text-align: left;
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 14px;
     color: #545f7d;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 14px;
+    text-align: left;
     white-space: nowrap;
     text-transform: uppercase;
   }
 
-  td {
-    padding: 18px 24px;
-    font-size: 14px;
-    line-height: 16px;
-    color: #545f7d;
-    border-bottom: 1px solid rgba(33, 63, 125, 0.1);
-    vertical-align: middle;
+  &__body,
+  &__bodyRow {
     overflow: visible;
   }
 
-  tbody tr:last-child td {
+  &__bodyCell {
+    overflow: visible;
+    border-bottom: 1px solid rgba(33, 63, 125, 0.1);
+    padding: 18px 24px;
+    vertical-align: middle;
+    color: #545f7d;
+    font-size: 14px;
+    line-height: 16px;
+  }
+
+  &__bodyRow:last-child &__bodyCell {
     border-bottom: none;
   }
 
-  tbody,
-  tr {
-    overflow: visible;
+  &__emptyState {
+    padding: 32px 24px !important;
+    color: #545f7d;
+    text-align: center;
   }
-}
 
-.emptyState {
-  text-align: center;
-  padding: 32px 24px !important;
-  color: #545f7d;
-}
-
-.footer {
-  margin-top: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.pageInfo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #545f7d;
-  font-size: 14px;
-  font-weight: 400;
-}
-
-.select {
-  height: 30px;
-  min-width: 80px;
-  border: none;
-  border-radius: 4px;
-  background: rgba(33, 63, 125, 0.1);
-  color: #213f7d;
-  padding: 0 24px 0 12px;
-  outline: none;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.paginationNumbers {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
-
-.paginationButton {
-  width: 24px;
-  height: 24px;
-  border: none;
-  border-radius: 4px;
-  background: rgba(33, 63, 125, 0.1);
-  color: #213f7d;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
+  &__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 20px;
   }
-}
 
-.pageNumber {
-  border: none;
-  background: transparent;
-  color: rgba(84, 95, 125, 0.6);
-  font-size: 16px;
-  font-weight: 400;
-  cursor: pointer;
-  padding: 0;
-}
+  &__pageInfo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #545f7d;
+    font-weight: 400;
+    font-size: 14px;
+  }
 
-.activePage {
-  color: #213f7d;
-  font-weight: 500;
-}
+  &__select {
+    min-width: 80px;
+    height: 30px;
+    border: none;
+    border-radius: 4px;
+    background: rgba(33, 63, 125, 0.1);
+    padding: 0 24px 0 12px;
+    color: #213f7d;
+    font-weight: 500;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+  }
 
-.ellipsis {
-  color: rgba(84, 95, 125, 0.6);
-  font-size: 16px;
-  line-height: 1;
+  &__pagination {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  &__paginationNumbers {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  &__paginationButton {
+    display: inline-flex;
+    width: 24px;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 4px;
+    background: rgba(33, 63, 125, 0.1);
+    color: #213f7d;
+    font-size: 16px;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+  }
+
+  &__pageNumber {
+    border: none;
+    background: transparent;
+    padding: 0;
+    color: rgba(84, 95, 125, 0.6);
+    font-weight: 400;
+    font-size: 16px;
+    cursor: pointer;
+
+    &--active {
+      color: #213f7d;
+      font-weight: 500;
+    }
+  }
+
+  &__ellipsis {
+    color: rgba(84, 95, 125, 0.6);
+    font-size: 16px;
+    line-height: 1;
+  }
 }
 
 @media (max-width: 768px) {
-  .footer {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
+  .tableBlock {
+    &__footer {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
 
-  .pageInfo {
-    justify-content: center;
-  }
+    &__pageInfo {
+      justify-content: center;
+    }
 
-  .pagination {
-    width: 100%;
-    justify-content: center;
-    gap: 12px;
-  }
+    &__pagination {
+      width: 100%;
+      justify-content: center;
+      gap: 12px;
+    }
 
-  .paginationNumbers {
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: center;
+    &__paginationNumbers {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
   }
 }

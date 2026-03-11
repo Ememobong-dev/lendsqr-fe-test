@@ -1,60 +1,62 @@
 .layout {
-  height: 100vh;
   display: flex;
+  height: 100dvh;
   flex-direction: column;
   overflow: hidden;
   background: #fbfbfb;
-}
 
-.topbarPane {
-  height: 80px;
-  min-height: 80px;
-  background: #ffffff;
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.04);
-  z-index: 30;
-}
+  &__topbar {
+    z-index: 30;
+    height: 80px;
+    min-height: 80px;
+    background: #ffffff;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.04);
+  }
 
-.bodyPane {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  overflow: hidden;
-}
+  &__body {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    overflow: hidden;
+  }
 
-.sidebarPane {
-  width: 283px;
-  min-width: 283px;
-  height: 100%;
-  background: #ffffff;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.04);
-  z-index: 20;
-}
+  &__sidebar {
+    z-index: 20;
+    width: 283px;
+    min-width: 283px;
+    height: 100%;
+    background: #ffffff;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.04);
+  }
 
-.contentPane {
-  flex: 1;
-  min-width: 0;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 60px 30px 40px;
-  background: #fbfbfb;
-}
+  &__content {
+    min-width: 0;
+    min-height: 0;
+    flex: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 60px 30px 40px;
+    background: #fbfbfb;
 
-.contentPane::-webkit-scrollbar {
-  width: 8px;
-}
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
 
-.contentPane::-webkit-scrollbar-thumb {
-  background: rgba(33, 63, 125, 0.15);
-  border-radius: 999px;
+    &::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: rgba(33, 63, 125, 0.15);
+    }
+  }
 }
 
 @media (max-width: 1024px) {
-  .sidebarPane {
-    display: none;
-  }
+  .layout {
+    &__sidebar {
+      display: none;
+    }
 
-  .contentPane {
-    padding: 24px 16px 32px;
+    &__content {
+      padding: 24px 16px 32px;
+    }
   }
 }

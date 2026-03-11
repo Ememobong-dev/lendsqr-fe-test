@@ -5,12 +5,12 @@ import styles from "./AuthIllustration.module.scss";
 
 export default function AuthIllustration() {
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.logo}>
+    <div className={styles.illustration}>
+      <div className={styles.illustration__logo}>
         <Image src={Logo} alt="Lendsqr" priority />
       </div>
 
-      <div className={styles.illustration}>
+      <div className={styles.illustration__media}>
         <Image src={Illustration} alt="Login illustration" priority />
       </div>
     </div>

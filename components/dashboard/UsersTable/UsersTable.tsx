@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
+import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import Image from "next/image";
-import { ColumnDef, PaginationState } from "@tanstack/react-table";
+import Link from "next/link";
+import type { ColumnDef, PaginationState } from "@tanstack/react-table";
 import DataTable from "../Table/DataTable";
-import styles from "./UsersTable.module.scss";
 import { fetchUsers } from "@/lib/api/users";
 import { saveUserDetails, saveUsersCache } from "@/lib/storage/user.storage";
-import { UserRecord, UserStatus } from "@/types/user";
+import type { UserRecord, UserStatus } from "@/types/user";
+import styles from "./UsersTable.module.scss";
 
 type FilterState = {
   organization: string;
@@ -35,7 +35,13 @@ type FilterFieldConfig = {
   options?: string[];
 };
 
-const defaultFilters: FilterState = {
+type ActionConfig = {
+  key: UserAction;
+  label: string;
+  icon: string;
+};
+
+const DEFAULT_FILTERS: FilterState = {
   organization: "",
   username: "",
   email: "",
@@ -44,7 +50,7 @@ const defaultFilters: FilterState = {
   status: "",
 };
 
-const filterFieldConfigs: FilterFieldConfig[] = [
+const FILTER_FIELD_CONFIGS: FilterFieldConfig[] = [
   {
     key: "organization",
     label: "Organization",
@@ -83,16 +89,39 @@ const filterFieldConfigs: FilterFieldConfig[] = [
   },
 ];
 
-function statusClassName(status: UserStatus) {
+const ACTION_CONFIG: Record<UserAction, ActionConfig> = {
+  "view-details": {
+    key: "view-details",
+    label: "View Details",
+    icon: "/icons/eye.svg",
+  },
+  "blacklist-user": {
+    key: "blacklist-user",
+    label: "Blacklist User",
+    icon: "/icons/blacklist-user.svg",
+  },
+  "activate-user": {
+    key: "activate-user",
+    label: "Activate User",
+    icon: "/icons/activate-user.svg",
+  },
+  "deactivate-user": {
+    key: "deactivate-user",
+    label: "Deactivate User",
+    icon: "/icons/blacklist-user.svg",
+  },
+};
+
+function getStatusVariant(status: UserStatus): string {
   switch (status) {
     case "Active":
-      return styles.active;
+      return styles["usersTable__statusBadge--active"];
     case "Pending":
-      return styles.pending;
+      return styles["usersTable__statusBadge--pending"];
     case "Blacklisted":
-      return styles.blacklisted;
+      return styles["usersTable__statusBadge--blacklisted"];
     default:
-      return styles.inactive;
+      return styles["usersTable__statusBadge--inactive"];
   }
 }
 
@@ -113,8 +142,10 @@ function getActionItems(status: UserStatus): UserAction[] {
 function reorderFilterFields(
   fields: FilterFieldConfig[],
   priorityKey: FilterFieldKey | null
-) {
-  if (!priorityKey) return fields;
+): FilterFieldConfig[] {
+  if (!priorityKey) {
+    return fields;
+  }
 
   const priorityField = fields.find((field) => field.key === priorityKey);
   const remainingFields = fields.filter((field) => field.key !== priorityKey);
@@ -122,17 +153,54 @@ function reorderFilterFields(
   return priorityField ? [priorityField, ...remainingFields] : fields;
 }
 
+type ColumnHeaderProps = {
+  label: string;
+  fieldKey: FilterFieldKey;
+  onOpen: (
+    fieldKey: FilterFieldKey,
+    event: ReactMouseEvent<HTMLButtonElement>
+  ) => void;
+  buttonRef: (element: HTMLButtonElement | null) => void;
+};
+
+function ColumnHeader({
+  label,
+  fieldKey,
+  onOpen,
+  buttonRef,
+}: ColumnHeaderProps) {
+  return (
+    <button
+      ref={buttonRef}
+      type="button"
+      className={styles.usersTable__headerButton}
+      onClick={(event) => onOpen(fieldKey, event)}
+    >
+      <span className={styles.usersTable__headerLabel}>{label}</span>
+
+      <span className={styles.usersTable__filterIcon}>
+        <Image
+          src="/icons/users-dash/filter-icon.svg"
+          width={14}
+          height={14}
+          alt="filter icon"
+        />
+      </span>
+    </button>
+  );
+}
+
 export default function UsersTable() {
   const [data, setData] = useState<UserRecord[]>([]);
-  const [total, setTotal] = useState(0);
-  const [showFilter, setShowFilter] = useState(false);
+  const [total, setTotal] = useState<number>(0);
+  const [showFilter, setShowFilter] = useState<boolean>(false);
   const [activeFilterField, setActiveFilterField] =
     useState<FilterFieldKey | null>("organization");
-  const [filters, setFilters] = useState<FilterState>(defaultFilters);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
   const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
-  const [filterLeft, setFilterLeft] = useState(14);
+  const [filterLeft, setFilterLeft] = useState<number>(14);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -141,10 +209,11 @@ export default function UsersTable() {
   const actionMenuRef = useRef<HTMLDivElement | null>(null);
   const filterCardRef = useRef<HTMLDivElement | null>(null);
   const tableAreaRef = useRef<HTMLDivElement | null>(null);
-  const headerButtonRefs = useRef<Partial<Record<FilterFieldKey, HTMLButtonElement | null>>>({});
+  const headerButtonRefs =
+    useRef<Partial<Record<FilterFieldKey, HTMLButtonElement | null>>>({});
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    const handleClickOutside = (event: MouseEvent): void => {
       const target = event.target as Node;
 
       if (
@@ -158,26 +227,29 @@ export default function UsersTable() {
         const clickedInsideFilter =
           filterCardRef.current?.contains(target) ?? false;
 
-        const clickedAnyHeader = Object.values(headerButtonRefs.current).some(
+        const clickedHeaderButton = Object.values(headerButtonRefs.current).some(
           (button) => button?.contains(target)
         );
 
-        if (!clickedInsideFilter && !clickedAnyHeader) {
+        if (!clickedInsideFilter && !clickedHeaderButton) {
           setShowFilter(false);
         }
       }
-    }
+    };
 
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showFilter]);
 
   useEffect(() => {
-    async function loadUsers() {
+    let isMounted = true;
+
+    const loadUsers = async (): Promise<void> => {
       try {
-        setLoading(true);
+        setIsLoading(true);
         setError("");
 
         const response = await fetchUsers({
@@ -191,38 +263,83 @@ export default function UsersTable() {
           status: filters.status,
         });
 
+        if (!isMounted) {
+          return;
+        }
+
         setData(response.data);
         setTotal(response.total);
         saveUsersCache(response.data);
-      } catch {
+      } catch (loadError) {
+        console.error("Failed to load users:", loadError);
+
+        if (!isMounted) {
+          return;
+        }
+
         setError("Unable to load users.");
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
-    }
+    };
 
-    loadUsers();
+    void loadUsers();
+
+    return () => {
+      isMounted = false;
+    };
   }, [pagination.pageIndex, pagination.pageSize, filters]);
 
   const orderedFilterFields = useMemo(
-    () => reorderFilterFields(filterFieldConfigs, activeFilterField),
+    () => reorderFilterFields(FILTER_FIELD_CONFIGS, activeFilterField),
     [activeFilterField]
   );
 
-  const openFilterForField = (
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil(total / pagination.pageSize)),
+    [total, pagination.pageSize]
+  );
+
+  const handleFilterOpen = (
     fieldKey: FilterFieldKey,
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
+    event: ReactMouseEvent<HTMLButtonElement>
+  ): void => {
     const buttonRect = event.currentTarget.getBoundingClientRect();
     const containerRect = tableAreaRef.current?.getBoundingClientRect();
 
     setActiveFilterField(fieldKey);
     setShowFilter(true);
 
-    if (!containerRect) return;
+    if (!containerRect) {
+      return;
+    }
 
-    const nextLeft = buttonRect.left - containerRect.left;
-    setFilterLeft(nextLeft);
+    setFilterLeft(buttonRect.left - containerRect.left);
+  };
+
+  const handleFilterChange = (
+    key: FilterFieldKey,
+    value: string
+  ): void => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+
+    setPagination((prev) => ({
+      ...prev,
+      pageIndex: 0,
+    }));
+  };
+
+  const handleResetFilters = (): void => {
+    setFilters(DEFAULT_FILTERS);
+    setPagination((prev) => ({
+      ...prev,
+      pageIndex: 0,
+    }));
   };
 
   const columns = useMemo<ColumnDef<UserRecord>[]>(
@@ -230,143 +347,83 @@ export default function UsersTable() {
       {
         accessorKey: "organization",
         header: () => (
-          <button
-            ref={(element) => {
+          <ColumnHeader
+            label="ORGANIZATION"
+            fieldKey="organization"
+            onOpen={handleFilterOpen}
+            buttonRef={(element) => {
               headerButtonRefs.current.organization = element;
             }}
-            type="button"
-            className={styles.headerButton}
-            onClick={(event) => openFilterForField("organization", event)}
-          >
-            ORGANIZATION
-            <span className={styles.filterIcon}>
-              <Image
-                src="/icons/users-dash/filter-icon.svg"
-                width={14}
-                height={14}
-                alt="filter icon"
-              />
-            </span>
-          </button>
+          />
         ),
       },
       {
         accessorKey: "username",
         header: () => (
-          <button
-            ref={(element) => {
+          <ColumnHeader
+            label="USERNAME"
+            fieldKey="username"
+            onOpen={handleFilterOpen}
+            buttonRef={(element) => {
               headerButtonRefs.current.username = element;
             }}
-            type="button"
-            className={styles.headerButton}
-            onClick={(event) => openFilterForField("username", event)}
-          >
-            USERNAME
-            <span className={styles.filterIcon}>
-              <Image
-                src="/icons/users-dash/filter-icon.svg"
-                width={14}
-                height={14}
-                alt="filter icon"
-              />
-            </span>
-          </button>
+          />
         ),
       },
       {
         accessorKey: "email",
         header: () => (
-          <button
-            ref={(element) => {
+          <ColumnHeader
+            label="EMAIL"
+            fieldKey="email"
+            onOpen={handleFilterOpen}
+            buttonRef={(element) => {
               headerButtonRefs.current.email = element;
             }}
-            type="button"
-            className={styles.headerButton}
-            onClick={(event) => openFilterForField("email", event)}
-          >
-            EMAIL
-            <span className={styles.filterIcon}>
-              <Image
-                src="/icons/users-dash/filter-icon.svg"
-                width={14}
-                height={14}
-                alt="filter icon"
-              />
-            </span>
-          </button>
+          />
         ),
       },
       {
         accessorKey: "phoneNumber",
         header: () => (
-          <button
-            ref={(element) => {
+          <ColumnHeader
+            label="PHONE NUMBER"
+            fieldKey="phoneNumber"
+            onOpen={handleFilterOpen}
+            buttonRef={(element) => {
               headerButtonRefs.current.phoneNumber = element;
             }}
-            type="button"
-            className={styles.headerButton}
-            onClick={(event) => openFilterForField("phoneNumber", event)}
-          >
-            PHONE NUMBER
-            <span className={styles.filterIcon}>
-              <Image
-                src="/icons/users-dash/filter-icon.svg"
-                width={14}
-                height={14}
-                alt="filter icon"
-              />
-            </span>
-          </button>
+          />
         ),
       },
       {
         accessorKey: "dateJoined",
         header: () => (
-          <button
-            ref={(element) => {
+          <ColumnHeader
+            label="DATE JOINED"
+            fieldKey="dateJoined"
+            onOpen={handleFilterOpen}
+            buttonRef={(element) => {
               headerButtonRefs.current.dateJoined = element;
             }}
-            type="button"
-            className={styles.headerButton}
-            onClick={(event) => openFilterForField("dateJoined", event)}
-          >
-            DATE JOINED
-            <span className={styles.filterIcon}>
-              <Image
-                src="/icons/users-dash/filter-icon.svg"
-                width={14}
-                height={14}
-                alt="filter icon"
-              />
-            </span>
-          </button>
+          />
         ),
       },
       {
         accessorKey: "status",
         header: () => (
-          <button
-            ref={(element) => {
+          <ColumnHeader
+            label="STATUS"
+            fieldKey="status"
+            onOpen={handleFilterOpen}
+            buttonRef={(element) => {
               headerButtonRefs.current.status = element;
             }}
-            type="button"
-            className={styles.headerButton}
-            onClick={(event) => openFilterForField("status", event)}
-          >
-            STATUS
-            <span className={styles.filterIcon}>
-              <Image
-                src="/icons/users-dash/filter-icon.svg"
-                width={14}
-                height={14}
-                alt="filter icon"
-              />
-            </span>
-          </button>
+          />
         ),
         cell: ({ row }) => (
           <span
-            className={`${styles.statusBadge} ${statusClassName(
+            className={`${styles.usersTable__statusBadge} ${getStatusVariant(
               row.original.status
             )}`}
           >
@@ -383,12 +440,17 @@ export default function UsersTable() {
           const actionItems = getActionItems(user.status);
 
           return (
-            <div className={styles.actionCell} ref={isOpen ? actionMenuRef : null}>
+            <div
+              className={styles.usersTable__actionCell}
+              ref={isOpen ? actionMenuRef : null}
+            >
               <button
                 type="button"
-                className={styles.actionButton}
+                className={styles.usersTable__actionButton}
                 onClick={() =>
-                  setOpenActionMenuId((prev) => (prev === user.id ? null : user.id))
+                  setOpenActionMenuId((prev) =>
+                    prev === user.id ? null : user.id
+                  )
                 }
               >
                 <Image
@@ -399,115 +461,86 @@ export default function UsersTable() {
                 />
               </button>
 
-              {isOpen && (
+              {isOpen ? (
                 <div
-                  className={`${styles.actionMenu} ${
-                    row.index >= data.length - 2 ? styles.actionMenuUp : ""
+                  className={`${styles.usersTable__actionMenu} ${
+                    row.index >= data.length - 2
+                      ? styles["usersTable__actionMenu--up"]
+                      : ""
                   }`}
                 >
-                  {actionItems.includes("view-details") && (
-                    <Link
-                      href={`/users/${user.slug}`}
-                      className={styles.actionMenuItem}
-                      onClick={() => {
-                        saveUserDetails(user);
-                        setOpenActionMenuId(null);
-                      }}
-                    >
-                      <Image
-                        src="/icons/eye.svg"
-                        alt=""
-                        width={16}
-                        height={16}
-                      />
-                      <span>View Details</span>
-                    </Link>
-                  )}
+                  {actionItems.map((actionKey) => {
+                    const action = ACTION_CONFIG[actionKey];
 
-                  {actionItems.includes("blacklist-user") && (
-                    <button type="button" className={styles.actionMenuItem}>
-                      <Image
-                        src="/icons/blacklist-user.svg"
-                        alt=""
-                        width={16}
-                        height={16}
-                      />
-                      <span>Blacklist User</span>
-                    </button>
-                  )}
+                    if (action.key === "view-details") {
+                      return (
+                        <Link
+                          key={action.key}
+                          href={`/users/${user.id}`}
+                          className={styles.usersTable__actionMenuItem}
+                          onClick={() => {
+                            saveUserDetails(user);
+                            setOpenActionMenuId(null);
+                          }}
+                        >
+                          <Image
+                            src={action.icon}
+                            alt=""
+                            width={16}
+                            height={16}
+                          />
+                          <span>{action.label}</span>
+                        </Link>
+                      );
+                    }
 
-                  {actionItems.includes("activate-user") && (
-                    <button type="button" className={styles.actionMenuItem}>
-                      <Image
-                        src="/icons/activate-user.svg"
-                        alt=""
-                        width={16}
-                        height={16}
-                      />
-                      <span>Activate User</span>
-                    </button>
-                  )}
-
-                  {actionItems.includes("deactivate-user") && (
-                    <button type="button" className={styles.actionMenuItem}>
-                      <Image
-                        src="/icons/blacklist-user.svg"
-                        alt=""
-                        width={16}
-                        height={16}
-                      />
-                      <span>Deactivate User</span>
-                    </button>
-                  )}
+                    return (
+                      <button
+                        key={action.key}
+                        type="button"
+                        className={styles.usersTable__actionMenuItem}
+                      >
+                        <Image
+                          src={action.icon}
+                          alt=""
+                          width={16}
+                          height={16}
+                        />
+                        <span>{action.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
-              )}
+              ) : null}
             </div>
           );
         },
       },
     ],
-    [openActionMenuId, data.length]
+    [data.length, openActionMenuId]
   );
 
-  const handleFilterChange = (key: FilterFieldKey, value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-    setPagination((prev) => ({
-      ...prev,
-      pageIndex: 0,
-    }));
-  };
-
-  const handleReset = () => {
-    setFilters(defaultFilters);
-    setPagination((prev) => ({
-      ...prev,
-      pageIndex: 0,
-    }));
-  };
-
-  const totalPages = Math.max(1, Math.ceil(total / pagination.pageSize));
-
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.tableArea} ref={tableAreaRef}>
-        {showFilter && (
+    <div className={styles.usersTable}>
+      <div className={styles.usersTable__tableArea} ref={tableAreaRef}>
+        {showFilter ? (
           <div
             ref={filterCardRef}
-            className={styles.filterCard}
+            className={styles.usersTable__filterCard}
             style={{ left: `${filterLeft}px` }}
           >
             {orderedFilterFields.map((field) => (
-              <div className={styles.field} key={field.key}>
-                <label>{field.label}</label>
+              <div className={styles.usersTable__field} key={field.key}>
+                <label className={styles.usersTable__fieldLabel}>
+                  {field.label}
+                </label>
 
                 {field.type === "select" ? (
                   <select
+                    className={styles.usersTable__fieldControl}
                     value={filters[field.key]}
-                    onChange={(e) =>
-                      handleFilterChange(field.key, e.target.value)
+                    onChange={(event) =>
+                      handleFilterChange(field.key, event.target.value)
                     }
                   >
                     <option value="">Select</option>
@@ -519,41 +552,44 @@ export default function UsersTable() {
                   </select>
                 ) : (
                   <input
+                    className={styles.usersTable__fieldControl}
                     type={field.type}
                     placeholder={field.placeholder}
                     value={filters[field.key]}
-                    onChange={(e) =>
-                      handleFilterChange(field.key, e.target.value)
+                    onChange={(event) =>
+                      handleFilterChange(field.key, event.target.value)
                     }
                   />
                 )}
               </div>
             ))}
 
-            <div className={styles.actions}>
+            <div className={styles.usersTable__actions}>
               <button
                 type="button"
-                className={styles.resetButton}
-                onClick={handleReset}
+                className={styles.usersTable__resetButton}
+                onClick={handleResetFilters}
               >
                 Reset
               </button>
 
               <button
                 type="button"
-                className={styles.filterButton}
+                className={styles.usersTable__filterButton}
                 onClick={() => setShowFilter(false)}
               >
                 Filter
               </button>
             </div>
           </div>
-        )}
+        ) : null}
 
         {error ? (
-          <div className={styles.feedbackState}>{error}</div>
-        ) : loading ? (
-          <div className={styles.feedbackState}>Loading users...</div>
+          <div className={styles.usersTable__feedbackState}>{error}</div>
+        ) : isLoading ? (
+          <div className={styles.usersTable__feedbackState}>
+            Loading users...
+          </div>
         ) : (
           <DataTable
             data={data}

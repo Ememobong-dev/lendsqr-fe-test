@@ -1,14 +1,13 @@
 .authLayout {
-    min-height: 100dvh;
-    display: flex;
-  }
-  
+  min-height: 100dvh;
+  display: flex;
+
   .leftPanel {
     position: relative;
     width: 50%;
     background: var(--color-bg-left);
   }
-  
+
   .rightPanel {
     width: 50%;
     background: var(--color-bg-right);
@@ -16,20 +15,24 @@
     align-items: center;
     justify-content: center;
     box-shadow: -1px 0 0 rgba(0, 0, 0, 0.03);
+
+    .formContainer {
+      width: 100%;
+      max-width: 447px;
+    }
   }
-  
-  .formContainer {
-    width: 100%;
-    max-width: 447px;
-  }
-  
-  @media (max-width: 1024px) {
+}
+
+/* Tablet & Mobile */
+@media (max-width: 1024px) {
+  .authLayout {
     .leftPanel {
       display: none;
     }
-  
+
     .rightPanel {
       width: 100%;
       padding: 40px 24px;
     }
   }
+}

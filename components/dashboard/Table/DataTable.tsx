@@ -1,17 +1,17 @@
 "use client";
 
 import {
-  ColumnDef,
-  PaginationState,
+  type ColumnDef,
+  type PaginationState,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import styles from "./DataTable.module.scss";
 
-type DataTableProps<T> = {
-  data: T[];
-  columns: ColumnDef<T, unknown>[];
+type DataTableProps<TData> = {
+  data: TData[];
+  columns: ColumnDef<TData, unknown>[];
   showFooterPagination?: boolean;
   pageSizeOptions?: number[];
   pagination: PaginationState;
@@ -21,12 +21,18 @@ type DataTableProps<T> = {
   totalPages?: number;
 };
 
-function buildChunkedPagination(currentPage: number, totalPages: number, chunkSize = 5) {
+type PaginationItem = number | "...";
+
+function buildPaginationRange(
+  currentPage: number,
+  totalPages: number,
+  chunkSize = 5
+): PaginationItem[] {
   const chunkIndex = Math.floor((currentPage - 1) / chunkSize);
   const startPage = chunkIndex * chunkSize + 1;
   const endPage = Math.min(startPage + chunkSize - 1, totalPages);
 
-  const pages: (number | string)[] = [];
+  const pages: PaginationItem[] = [];
 
   if (startPage > 1) {
     pages.push(1);
@@ -51,7 +57,7 @@ function buildChunkedPagination(currentPage: number, totalPages: number, chunkSi
   return pages;
 }
 
-export default function DataTable<T>({
+export default function DataTable<TData>({
   data,
   columns,
   showFooterPagination = true,
@@ -61,38 +67,74 @@ export default function DataTable<T>({
   manualPagination = false,
   totalItems = data.length,
   totalPages,
-}: DataTableProps<T>) {
+}: DataTableProps<TData>) {
   const computedTotalPages =
     totalPages ?? Math.max(1, Math.ceil(totalItems / pagination.pageSize));
 
   const currentPage = pagination.pageIndex + 1;
+  const paginationRange = buildPaginationRange(
+    currentPage,
+    computedTotalPages,
+    5
+  );
+
+  const handlePageChange = (page: number): void => {
+    onPaginationChange({
+      pageIndex: page - 1,
+      pageSize: pagination.pageSize,
+    });
+  };
+
+  const handlePreviousPage = (): void => {
+    onPaginationChange({
+      pageIndex: pagination.pageIndex - 1,
+      pageSize: pagination.pageSize,
+    });
+  };
+
+  const handleNextPage = (): void => {
+    onPaginationChange({
+      pageIndex: pagination.pageIndex + 1,
+      pageSize: pagination.pageSize,
+    });
+  };
+
+  const handlePageSizeChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ): void => {
+    onPaginationChange({
+      pageIndex: 0,
+      pageSize: Number(event.target.value),
+    });
+  };
 
   const table = useReactTable({
     data,
     columns,
-    state: { pagination },
+    state: {
+      pagination,
+    },
     onPaginationChange: (updater) => {
-      const next =
+      const nextPagination =
         typeof updater === "function" ? updater(pagination) : updater;
-      onPaginationChange(next);
+
+      onPaginationChange(nextPagination);
     },
     getCoreRowModel: getCoreRowModel(),
     manualPagination,
     pageCount: computedTotalPages,
   });
 
-  const paginationRange = buildChunkedPagination(currentPage, computedTotalPages, 5);
-
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.tableScroll}>
-        <div className={styles.tableContainer}>
-          <table className={styles.table}>
-            <thead>
+    <div className={styles.tableBlock}>
+      <div className={styles.tableBlock__scroll}>
+        <div className={styles.tableBlock__container}>
+          <table className={styles.tableBlock__table}>
+            <thead className={styles.tableBlock__head}>
               {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
+                <tr key={headerGroup.id} className={styles.tableBlock__headRow}>
                   {headerGroup.headers.map((header) => (
-                    <th key={header.id}>
+                    <th key={header.id} className={styles.tableBlock__headCell}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -105,12 +147,12 @@ export default function DataTable<T>({
               ))}
             </thead>
 
-            <tbody>
+            <tbody className={styles.tableBlock__body}>
               {data.length > 0 ? (
                 table.getRowModel().rows.map((row) => (
-                  <tr key={row.id}>
+                  <tr key={row.id} className={styles.tableBlock__bodyRow}>
                     {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id}>
+                      <td key={cell.id} className={styles.tableBlock__bodyCell}>
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -120,8 +162,11 @@ export default function DataTable<T>({
                   </tr>
                 ))
               ) : (
-                <tr>
-                  <td className={styles.emptyState} colSpan={columns.length}>
+                <tr className={styles.tableBlock__bodyRow}>
+                  <td
+                    className={styles.tableBlock__emptyState}
+                    colSpan={columns.length}
+                  >
                     No records found
                   </td>
                 </tr>
@@ -131,20 +176,15 @@ export default function DataTable<T>({
         </div>
       </div>
 
-      {showFooterPagination && (
-        <div className={styles.footer}>
-          <div className={styles.pageInfo}>
+      {showFooterPagination ? (
+        <div className={styles.tableBlock__footer}>
+          <div className={styles.tableBlock__pageInfo}>
             <span>Showing</span>
 
             <select
               value={pagination.pageSize}
-              onChange={(e) =>
-                onPaginationChange({
-                  pageIndex: 0,
-                  pageSize: Number(e.target.value),
-                })
-              }
-              className={styles.select}
+              onChange={handlePageSizeChange}
+              className={styles.tableBlock__select}
             >
               {pageSizeOptions.map((size) => (
                 <option key={size} value={size}>
@@ -156,27 +196,25 @@ export default function DataTable<T>({
             <span>out of {totalItems}</span>
           </div>
 
-          <div className={styles.pagination}>
+          <div className={styles.tableBlock__pagination}>
             <button
               type="button"
-              className={styles.paginationButton}
+              className={styles.tableBlock__paginationButton}
               disabled={currentPage <= 1}
-              onClick={() =>
-                onPaginationChange({
-                  pageIndex: pagination.pageIndex - 1,
-                  pageSize: pagination.pageSize,
-                })
-              }
+              onClick={handlePreviousPage}
               aria-label="Previous page"
             >
               ‹
             </button>
 
-            <div className={styles.paginationNumbers}>
+            <div className={styles.tableBlock__paginationNumbers}>
               {paginationRange.map((item, index) => {
                 if (item === "...") {
                   return (
-                    <span key={`ellipsis-${index}`} className={styles.ellipsis}>
+                    <span
+                      key={`ellipsis-${index}`}
+                      className={styles.tableBlock__ellipsis}
+                    >
                       ...
                     </span>
                   );
@@ -188,15 +226,11 @@ export default function DataTable<T>({
                   <button
                     key={item}
                     type="button"
-                    className={`${styles.pageNumber} ${
-                      isActive ? styles.activePage : ""
+                    className={`${styles.tableBlock__pageNumber} ${
+                      isActive ? styles["tableBlock__pageNumber--active"] : ""
                     }`}
-                    onClick={() =>
-                      onPaginationChange({
-                        pageIndex: (item as number) - 1,
-                        pageSize: pagination.pageSize,
-                      })
-                    }
+                    onClick={() => handlePageChange(item)}
+                    aria-current={isActive ? "page" : undefined}
                   >
                     {item}
                   </button>
@@ -206,21 +240,16 @@ export default function DataTable<T>({
 
             <button
               type="button"
-              className={styles.paginationButton}
+              className={styles.tableBlock__paginationButton}
               disabled={currentPage >= computedTotalPages}
-              onClick={() =>
-                onPaginationChange({
-                  pageIndex: pagination.pageIndex + 1,
-                  pageSize: pagination.pageSize,
-                })
-              }
+              onClick={handleNextPage}
               aria-label="Next page"
             >
               ›
             </button>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

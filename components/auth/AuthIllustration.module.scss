@@ -1,33 +1,33 @@
-.wrapper {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-  }
-  
-  .logo {
+.illustration {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+
+  &__logo {
     position: absolute;
     top: 57px;
     left: 97px;
-  
+
     img {
+      display: block;
       width: 173.76px;
       height: auto;
-      display: block;
     }
   }
-  
-  .illustration {
+
+  &__media {
+    display: flex;
     width: 100%;
     height: 100%;
-    display: flex;
     align-items: center;
     justify-content: center;
     padding: 0 40px;
-  
+
     img {
+      display: block;
       width: 100%;
       max-width: 800px;
       height: auto;
-      display: block;
     }
   }
+}
