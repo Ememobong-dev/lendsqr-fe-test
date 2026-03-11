@@ -139,21 +139,40 @@ export default function UsersTable() {
   });
 
   const actionMenuRef = useRef<HTMLDivElement | null>(null);
+  const filterCardRef = useRef<HTMLDivElement | null>(null);
   const tableAreaRef = useRef<HTMLDivElement | null>(null);
+  const headerButtonRefs = useRef<Partial<Record<FilterFieldKey, HTMLButtonElement | null>>>({});
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+
       if (
         actionMenuRef.current &&
-        !actionMenuRef.current.contains(event.target as Node)
+        !actionMenuRef.current.contains(target)
       ) {
         setOpenActionMenuId(null);
+      }
+
+      if (showFilter) {
+        const clickedInsideFilter =
+          filterCardRef.current?.contains(target) ?? false;
+
+        const clickedAnyHeader = Object.values(headerButtonRefs.current).some(
+          (button) => button?.contains(target)
+        );
+
+        if (!clickedInsideFilter && !clickedAnyHeader) {
+          setShowFilter(false);
+        }
       }
     }
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showFilter]);
 
   useEffect(() => {
     async function loadUsers() {
@@ -194,16 +213,15 @@ export default function UsersTable() {
     fieldKey: FilterFieldKey,
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
-    setActiveFilterField(fieldKey);
-    setShowFilter(true);
-
     const buttonRect = event.currentTarget.getBoundingClientRect();
     const containerRect = tableAreaRef.current?.getBoundingClientRect();
+
+    setActiveFilterField(fieldKey);
+    setShowFilter(true);
 
     if (!containerRect) return;
 
     const nextLeft = buttonRect.left - containerRect.left;
-
     setFilterLeft(nextLeft);
   };
 
@@ -213,6 +231,9 @@ export default function UsersTable() {
         accessorKey: "organization",
         header: () => (
           <button
+            ref={(element) => {
+              headerButtonRefs.current.organization = element;
+            }}
             type="button"
             className={styles.headerButton}
             onClick={(event) => openFilterForField("organization", event)}
@@ -233,6 +254,9 @@ export default function UsersTable() {
         accessorKey: "username",
         header: () => (
           <button
+            ref={(element) => {
+              headerButtonRefs.current.username = element;
+            }}
             type="button"
             className={styles.headerButton}
             onClick={(event) => openFilterForField("username", event)}
@@ -253,6 +277,9 @@ export default function UsersTable() {
         accessorKey: "email",
         header: () => (
           <button
+            ref={(element) => {
+              headerButtonRefs.current.email = element;
+            }}
             type="button"
             className={styles.headerButton}
             onClick={(event) => openFilterForField("email", event)}
@@ -273,6 +300,9 @@ export default function UsersTable() {
         accessorKey: "phoneNumber",
         header: () => (
           <button
+            ref={(element) => {
+              headerButtonRefs.current.phoneNumber = element;
+            }}
             type="button"
             className={styles.headerButton}
             onClick={(event) => openFilterForField("phoneNumber", event)}
@@ -293,6 +323,9 @@ export default function UsersTable() {
         accessorKey: "dateJoined",
         header: () => (
           <button
+            ref={(element) => {
+              headerButtonRefs.current.dateJoined = element;
+            }}
             type="button"
             className={styles.headerButton}
             onClick={(event) => openFilterForField("dateJoined", event)}
@@ -313,6 +346,9 @@ export default function UsersTable() {
         accessorKey: "status",
         header: () => (
           <button
+            ref={(element) => {
+              headerButtonRefs.current.status = element;
+            }}
             type="button"
             className={styles.headerButton}
             onClick={(event) => openFilterForField("status", event)}
@@ -459,6 +495,7 @@ export default function UsersTable() {
       <div className={styles.tableArea} ref={tableAreaRef}>
         {showFilter && (
           <div
+            ref={filterCardRef}
             className={styles.filterCard}
             style={{ left: `${filterLeft}px` }}
           >

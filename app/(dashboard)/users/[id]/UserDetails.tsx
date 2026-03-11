@@ -24,9 +24,19 @@ function renderStars(tier: number) {
   });
 }
 
+const tabs = [
+  "General Details",
+  "Documents",
+  "Bank Details",
+  "Loans",
+  "Savings",
+  "App and System",
+];
+
 export default function UserDetails({ slug }: { slug: string }) {
   const [user, setUser] = useState<UserRecord | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("General Details");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -123,88 +133,88 @@ export default function UserDetails({ slug }: { slug: string }) {
         </div>
 
         <div className={styles.tabs}>
-          <button type="button" className={styles.activeTab}>
-            General Details
-          </button>
-          <button type="button" className={styles.tab}>
-            Documents
-          </button>
-          <button type="button" className={styles.tab}>
-            Bank Details
-          </button>
-          <button type="button" className={styles.tab}>
-            Loans
-          </button>
-          <button type="button" className={styles.tab}>
-            Savings
-          </button>
-          <button type="button" className={styles.tab}>
-            App and System
-          </button>
-        </div>
-      </section>
-
-      <section className={styles.detailsCard}>
-        <div className={styles.sectionBlock}>
-          <h3 className={styles.sectionHeading}>Personal Information</h3>
-          <div className={styles.sectionContent}>
-            <div className={styles.detailsGrid}>
-              <div><span>FULL NAME</span><p>{user.personalInformation.fullName}</p></div>
-              <div><span>PHONE NUMBER</span><p>{user.personalInformation.phoneNumber}</p></div>
-              <div><span>EMAIL ADDRESS</span><p>{user.personalInformation.email}</p></div>
-              <div><span>BVN</span><p>{user.personalInformation.bvn}</p></div>
-              <div><span>GENDER</span><p>{user.personalInformation.gender}</p></div>
-              <div><span>MARITAL STATUS</span><p>{user.personalInformation.maritalStatus}</p></div>
-              <div><span>CHILDREN</span><p>{user.personalInformation.children}</p></div>
-              <div><span>TYPE OF RESIDENCE</span><p>{user.personalInformation.typeOfResidence}</p></div>
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.sectionBlock}>
-          <h3 className={styles.sectionHeading}>Education and Employment</h3>
-          <div className={styles.sectionContent}>
-            <div className={`${styles.detailsGrid} ${styles.fourCol}`}>
-              <div><span>LEVEL OF EDUCATION</span><p>{user.educationEmployment.levelOfEducation}</p></div>
-              <div><span>EMPLOYMENT STATUS</span><p>{user.educationEmployment.employmentStatus}</p></div>
-              <div><span>SECTOR OF EMPLOYMENT</span><p>{user.educationEmployment.sectorOfEmployment}</p></div>
-              <div><span>DURATION OF EMPLOYMENT</span><p>{user.educationEmployment.durationOfEmployment}</p></div>
-              <div><span>OFFICE EMAIL</span><p>{user.educationEmployment.officeEmail}</p></div>
-              <div><span>MONTHLY INCOME</span><p>{user.educationEmployment.monthlyIncome}</p></div>
-              <div><span>LOAN REPAYMENT</span><p>₦{formatCurrency(Number(user.educationEmployment.loanRepayment))}</p></div>
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.sectionBlock}>
-          <h3 className={styles.sectionHeading}>Socials</h3>
-          <div className={styles.sectionContent}>
-            <div className={styles.detailsGrid}>
-              <div><span>TWITTER</span><p>{user.socials.twitter}</p></div>
-              <div><span>FACEBOOK</span><p>{user.socials.facebook}</p></div>
-              <div><span>INSTAGRAM</span><p>{user.socials.instagram}</p></div>
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.sectionBlock}>
-          <h3 className={styles.sectionHeading}>Guarantor</h3>
-
-          {user.guarantor.map((person, index) => (
-            <div
-              key={`${person.email}-${index}`}
-              className={index > 0 ? styles.guarantorBlock : styles.sectionContent}
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              className={activeTab === tab ? styles.activeTab : styles.tab}
+              onClick={() => setActiveTab(tab)}
             >
-              <div className={styles.detailsGrid}>
-                <div><span>FULL NAME</span><p>{person.fullName}</p></div>
-                <div><span>PHONE NUMBER</span><p>{person.phoneNumber}</p></div>
-                <div><span>EMAIL ADDRESS</span><p>{person.email}</p></div>
-                <div><span>RELATIONSHIP</span><p>{person.relationship}</p></div>
-              </div>
-            </div>
+              {tab}
+            </button>
           ))}
         </div>
       </section>
+
+      {activeTab === "General Details" ? (
+        <section className={styles.detailsCard}>
+          <div className={styles.sectionBlock}>
+            <h3 className={styles.sectionHeading}>Personal Information</h3>
+            <div className={styles.sectionContent}>
+              <div className={styles.detailsGrid}>
+                <div><span>FULL NAME</span><p>{user.personalInformation.fullName}</p></div>
+                <div><span>PHONE NUMBER</span><p>{user.personalInformation.phoneNumber}</p></div>
+                <div><span>EMAIL ADDRESS</span><p>{user.personalInformation.email}</p></div>
+                <div><span>BVN</span><p>{user.personalInformation.bvn}</p></div>
+                <div><span>GENDER</span><p>{user.personalInformation.gender}</p></div>
+                <div><span>MARITAL STATUS</span><p>{user.personalInformation.maritalStatus}</p></div>
+                <div><span>CHILDREN</span><p>{user.personalInformation.children}</p></div>
+                <div><span>TYPE OF RESIDENCE</span><p>{user.personalInformation.typeOfResidence}</p></div>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.sectionBlock}>
+            <h3 className={styles.sectionHeading}>Education and Employment</h3>
+            <div className={styles.sectionContent}>
+              <div className={`${styles.detailsGrid} ${styles.fourCol}`}>
+                <div><span>LEVEL OF EDUCATION</span><p>{user.educationEmployment.levelOfEducation}</p></div>
+                <div><span>EMPLOYMENT STATUS</span><p>{user.educationEmployment.employmentStatus}</p></div>
+                <div><span>SECTOR OF EMPLOYMENT</span><p>{user.educationEmployment.sectorOfEmployment}</p></div>
+                <div><span>DURATION OF EMPLOYMENT</span><p>{user.educationEmployment.durationOfEmployment}</p></div>
+                <div><span>OFFICE EMAIL</span><p>{user.educationEmployment.officeEmail}</p></div>
+                <div><span>MONTHLY INCOME</span><p>{user.educationEmployment.monthlyIncome}</p></div>
+                <div><span>LOAN REPAYMENT</span><p>₦{formatCurrency(Number(user.educationEmployment.loanRepayment))}</p></div>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.sectionBlock}>
+            <h3 className={styles.sectionHeading}>Socials</h3>
+            <div className={styles.sectionContent}>
+              <div className={styles.detailsGrid}>
+                <div><span>TWITTER</span><p>{user.socials.twitter}</p></div>
+                <div><span>FACEBOOK</span><p>{user.socials.facebook}</p></div>
+                <div><span>INSTAGRAM</span><p>{user.socials.instagram}</p></div>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.sectionBlock}>
+            <h3 className={styles.sectionHeading}>Guarantor</h3>
+
+            {user.guarantor.map((person, index) => (
+              <div
+                key={`${person.email}-${index}`}
+                className={index > 0 ? styles.guarantorBlock : styles.sectionContent}
+              >
+                <div className={styles.detailsGrid}>
+                  <div><span>FULL NAME</span><p>{person.fullName}</p></div>
+                  <div><span>PHONE NUMBER</span><p>{person.phoneNumber}</p></div>
+                  <div><span>EMAIL ADDRESS</span><p>{person.email}</p></div>
+                  <div><span>RELATIONSHIP</span><p>{person.relationship}</p></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : (
+        <section className={styles.detailsCard}>
+          <div className={styles.tabPlaceholder}>
+            {activeTab}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
