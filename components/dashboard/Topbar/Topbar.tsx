@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./Topbar.module.scss";
 
 type NavItem = {
@@ -66,9 +67,14 @@ const sections: NavSection[] = [
 ];
 
 export default function Topbar() {
+  const router = useRouter();
+
   const [query, setQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
   const results = useMemo(() => {
     if (!submittedQuery.trim()) return [];
@@ -84,6 +90,11 @@ export default function Topbar() {
   const closeDrawer = () => setIsDrawerOpen(false);
   const toggleDrawer = () => setIsDrawerOpen((prev) => !prev);
 
+  const handleLogout = () => {
+    setIsProfileMenuOpen(false);
+    router.push("/login");
+  };
+
   useEffect(() => {
     if (!isDrawerOpen) return;
 
@@ -94,6 +105,24 @@ export default function Topbar() {
       document.body.style.overflow = originalOverflow;
     };
   }, [isDrawerOpen]);
+
+  useEffect(() => {
+    function handleOutsideClick(event: MouseEvent) {
+      const target = event.target as Node;
+
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(target)
+      ) {
+        setIsProfileMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
 
   return (
     <>
@@ -184,22 +213,48 @@ export default function Topbar() {
             />
           </button>
 
-          <button type="button" className={styles.profileButton}>
-            <Image
-              src="/images/profile-img.png"
-              alt="Adedeji"
-              width={48}
-              height={48}
-              className={styles.avatar}
-            />
-            <span className={styles.profileName}>Adedeji</span>
-            <Image
-              src="/icons/chevron-dropdown.svg"
-              alt=""
-              width={24}
-              height={24}
-            />
-          </button>
+          <div className={styles.profileMenuWrap} ref={profileMenuRef}>
+            <button
+              type="button"
+              className={styles.profileButton}
+              onClick={() => setIsProfileMenuOpen((prev) => !prev)}
+              aria-haspopup="menu"
+              aria-expanded={isProfileMenuOpen}
+            >
+              <Image
+                src="/images/profile-img.png"
+                alt="Adedeji"
+                width={48}
+                height={48}
+                className={styles.avatar}
+              />
+              <span className={styles.profileName}>Adedeji</span>
+              <Image
+                src="/icons/chevron-dropdown.svg"
+                alt=""
+                width={24}
+                height={24}
+              />
+            </button>
+
+            {isProfileMenuOpen && (
+              <div className={styles.profileDropdown} role="menu">
+                <button
+                  type="button"
+                  className={styles.profileDropdownItem}
+                  onClick={handleLogout}
+                >
+                  <Image
+                    src="/icons/logout.svg"
+                    alt=""
+                    width={16}
+                    height={16}
+                  />
+                  <span>Logout</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
