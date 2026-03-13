@@ -5,7 +5,6 @@
   .leftPanel {
     position: relative;
     width: 50%;
-    background: var(--color-bg-left);
   }
 
   .rightPanel {
@@ -14,7 +13,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: -1px 0 0 rgba(0, 0, 0, 0.03);
+    box-shadow: 0px 15px 90px 0px rgba(0, 0, 0, 0.03);
 
     .formContainer {
       width: 100%;

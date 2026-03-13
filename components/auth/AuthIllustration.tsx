@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Logo from "@/public/brandlogo.svg";
-import Illustration from "@/public/images/auth-illus.png";
+import Illustration from "@/public/images/auth-illustration.svg";
 import styles from "./AuthIllustration.module.scss";
 
 export default function AuthIllustration() {
