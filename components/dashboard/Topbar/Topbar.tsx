@@ -368,12 +368,6 @@ export default function Topbar() {
                   className={styles.topbar__profileDropdownItem}
                   onClick={handleLogout}
                 >
-                  <Image
-                    src="/icons/logout.svg"
-                    alt=""
-                    width={16}
-                    height={16}
-                  />
                   <span>Logout</span>
                 </button>
               </div>
